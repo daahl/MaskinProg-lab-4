@@ -1,0 +1,7 @@
+-I/usr/share/codelite/tools/gcc-arm/arm-none-eabi/include/c++/9.2.1
+-I/usr/share/codelite/tools/gcc-arm/arm-none-eabi/include/c++/9.2.1/arm-none-eabi
+-I/usr/share/codelite/tools/gcc-arm/arm-none-eabi/include/c++/9.2.1/backward
+-I/usr/share/codelite/tools/gcc-arm/lib/gcc/arm-none-eabi/9.2.1/include
+-I/usr/share/codelite/tools/gcc-arm/lib/gcc/arm-none-eabi/9.2.1/include-fixed
+-I/usr/share/codelite/tools/gcc-arm/arm-none-eabi/include
+-I/home/mac/Documents/mop/mopWorkspace/systick_6-3
