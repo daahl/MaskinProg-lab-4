@@ -30,6 +30,7 @@ __attribute__((naked)) setControlReg(unsigned int x)
 #define GPIO_D_ODR_LOW  	((volatile unsigned char*)  (GPIO_D+0x14))  // The LOW values in the ODR, D0-7
 
 #define GPIO_E				0x40021000
+#define GPIO_E_MODER		((volatile unsigned int*)   GPIO_E)         // I/O config
 #define GPIO_E_ODR_LOW		((volatile unsigned char*)  (GPIO_E+0x14)) // Low E ODR
 #define GPIO_E_IDR_LOW		((volatile unsigned char*)  (GPIO_E+0x10)) // Low E IDR
 
@@ -52,23 +53,23 @@ void irq_handler(void){
 	GPIO_E_IN = *GPIO_E_IDR_LOW; 
 	
 	if(*EXTI_PR & (1<<3)){ // IF IRQ on EXTI3, (1<<3)
-		*EXTI_PR |= (1<<3); // Reset IRQ
+		*EXTI_PR |= (1<<3); // Reset IRQ on EXTI3
 		
 		switch(GPIO_E_IN){ // 9 = IRQ0, 10 = IRQ1, 12 = IRQ2
-			case 9: *GPIO_E_ODR_LOW &= (1<<5); // Reset IRQ0
-					*GPIO_E_ODR_LOW &= ~(1<<5);
+			case 9: *GPIO_E_ODR_LOW |= (1<<4); // Reset IRQ0. First write 1...
+					*GPIO_E_ODR_LOW &= ~(1<<4); // ... then write 0
 					IRQ_count++;
 					break;
-			case 10: *GPIO_E_ODR_LOW &= (1<<6); // Reset IRQ0
-					 *GPIO_E_ODR_LOW &= ~(1<<6);
+			case 10: *GPIO_E_ODR_LOW |= (1<<5); // Reset IRQ1
+					 *GPIO_E_ODR_LOW &= ~(1<<5);
 					 IRQ_count = 0;
 					 break;
-			case 12: *GPIO_E_ODR_LOW &= (1<<5); // Reset IRQ0
-					 *GPIO_E_ODR_LOW &= ~(1<<5);
+			case 12: *GPIO_E_ODR_LOW |= (1<<6); // Reset IRQ2
+					 *GPIO_E_ODR_LOW &= ~(1<<6);
 					 if(IRQ_count){
 						 IRQ_count = 0; // Turn off disp
 					 }else{
-						 IRQ_count = 255; // Turn on disp
+						 IRQ_count = 0xFF; // Turn on disp
 					 }
 					 break;
 			default: 
@@ -78,7 +79,8 @@ void irq_handler(void){
 }
 
 void app_init(void){
-	*GPIO_D_MODER = 0x5555; // Set low D to output for the display
+	*GPIO_D_MODER = 0x00005555; // Set low D to output for the display
+	*GPIO_E_MODER = 0x00005500; // Set 2nd lowest byte on port E to output for reseting the IRQs
 	
 	*SYSCFG_EXTICR1 &= ~0xF000; // Zero EXTI3 (highest byte in SYSCFG)
 	*SYSCFG_EXTICR1 |= 0x4000; // Connect PE3 to EXTI3 (low GPIO E)
